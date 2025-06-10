@@ -21,9 +21,11 @@ if os.path.exists(CACHE_FILE):
 else:
     youtube_cache = {}
 
+
 def save_cache():
     with open(CACHE_FILE, "w") as f:
         json.dump(youtube_cache, f, indent=2)
+
 
 # === Random seed ===
 random_state = 42
@@ -120,32 +122,49 @@ def recommend_by_song(song_name, top_n=10):
     song_name = song_name.lower()
     df["name_lower"] = df["name"].str.lower()
 
-    if song_name not in df["name_lower"].values:
+    matches = df[df["name_lower"].str.contains(song_name)]
+    if matches.empty:
         return []
 
-    song_vec = df[df["name_lower"] == song_name]["features"].values[0].reshape(1, -1)
-    df["distance"] = euclidean_distances(df["features"].tolist(), song_vec)
-    recs = df[df["name_lower"] != song_name].sort_values("distance").head(top_n)
+    ref_song = matches.iloc[0]
+    song_vec = np.array(ref_song["features"]).reshape(1, -1)
 
-    return [
+    df["distance"] = euclidean_distances(df["features"].tolist(), song_vec)
+
+    similar_songs = (
+        df[df["name"] != ref_song["name"]].sort_values("distance").head(top_n)
+    )
+
+    result = [
+        {
+            "artist": ref_song["artists_main"],
+            "title": ref_song["name"],
+            "link": get_direct_youtube_link(ref_song["artists_main"], ref_song["name"]),
+        }
+    ] + [
         {
             "artist": row["artists_main"],
             "title": row["name"],
             "link": get_direct_youtube_link(row["artists_main"], row["name"]),
         }
-        for _, row in recs.iterrows()
+        for _, row in similar_songs.iterrows()
     ]
 
-def recommend_by_artist(artist_name, top_n=10):
+    return result
+
+
+def recommend_by_artist(artist_name, top_n=100):
     artist_name = artist_name.lower()
     df["artist_lower"] = df["artists_main"].str.lower()
 
     if artist_name not in df["artist_lower"].values:
         return []
 
-    artist_vec = df[df["artist_lower"] == artist_name]["features"].mean().reshape(1, -1)
-    df["distance"] = euclidean_distances(df["features"].tolist(), artist_vec)
-    recs = df[df["artist_lower"] != artist_name].sort_values("distance").head(top_n)
+    recs = (
+        df[df["artist_lower"] == artist_name]
+        .sort_values("popularity", ascending=False)
+        .head(top_n)
+    )
 
     return [
         {
@@ -155,6 +174,7 @@ def recommend_by_artist(artist_name, top_n=10):
         }
         for _, row in recs.iterrows()
     ]
+
 
 def recommend_by_mood(mood, top_n=10):
     if mood not in mood_presets:
