@@ -1,0 +1,7 @@
+streamlit
+pandas
+numpy
+scikit-learn
+umap-learn
+requests
+protobuf<4.0.0
