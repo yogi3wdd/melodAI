@@ -1,7 +1,7 @@
 import streamlit as st
 from musicRecomendation import recommend_by_song, recommend_by_artist, recommend_by_mood
 
-# Safe rerun untuk berbagai versi Streamlit
+
 try:
     rerun = st.experimental_rerun
 except AttributeError:
@@ -13,7 +13,7 @@ st.markdown("Mau dengerin musik berdasarkan apa hari ini?")
 
 left, right = st.columns([1, 2])
 
-# === Inisialisasi state ===
+
 if "filter" not in st.session_state:
     st.session_state.filter = None
 if "selected_mood" not in st.session_state:
@@ -25,7 +25,7 @@ if "shown_count" not in st.session_state:
 if "last_input" not in st.session_state:
     st.session_state.last_input = ""
 
-# === KIRI: Filter ===
+
 with left:
     st.markdown("### Pilih Filter Rekomendasi")
     if st.button("🎵 Lagu", use_container_width=True):
@@ -48,7 +48,7 @@ with left:
         st.session_state.shown_count = 10
         st.session_state.last_input = ""
 
-    # Tombol mood muncul jika filter mood dipilih
+   
     if st.session_state.filter == "mood":
         st.markdown("### Pilih Mood:")
         col1, col2 = st.columns(2)
@@ -79,7 +79,7 @@ with left:
                 st.session_state.shown_count = 10
                 st.session_state.last_input = ""
 
-# === KANAN: Rekomendasi ===
+
 with right:
     ftype = st.session_state.filter
     count = st.session_state.shown_count
