@@ -10,10 +10,10 @@ from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 from umap import UMAP
 
-# === YouTube API Key ===
+
 YOUTUBE_API_KEY = "AIzaSyB36xMPo5-pv2vF8eZM2dJFqwvXDTH3KN8"
 
-# === Cache Setup ===
+
 CACHE_FILE = "youtube_cache.json"
 if os.path.exists(CACHE_FILE):
     with open(CACHE_FILE, "r") as f:
@@ -27,14 +27,14 @@ def save_cache():
         json.dump(youtube_cache, f, indent=2)
 
 
-# === Random seed ===
+
 random_state = 42
 np.random.seed(random_state)
 
-# === Load dataset ===
+
 df = pd.read_csv("dataset/data.csv")
 
-# === Preprocessing ===
+
 df = df.drop_duplicates(subset=["artists", "name"])
 df = df[df["name"].str.contains("[a-zA-Z]+")]
 df["artists_main"] = df["artists"].apply(
@@ -73,7 +73,7 @@ df["umap_1"] = X_umap[:, 0]
 df["umap_2"] = X_umap[:, 1]
 df["features"] = list(X_umap)
 
-# === Mood Presets ===
+
 mood_presets = {
     "happy": {"valence": 0.8, "energy": 0.7},
     "calm": {"valence": 0.4, "energy": 0.3},
@@ -82,15 +82,15 @@ mood_presets = {
 }
 
 
-# === YouTube Video Search ===
+
 def get_direct_youtube_link(artist, title):
     query = f"{artist} {title}".lower()
 
-    # Check cache
+   
     if query in youtube_cache:
         return youtube_cache[query]
 
-    # If not in cache, call YouTube API
+    
     url = "https://www.googleapis.com/youtube/v3/search"
     params = {
         "part": "snippet",
@@ -117,7 +117,7 @@ def get_direct_youtube_link(artist, title):
     return None
 
 
-# === Recommendation Functions ===
+
 def recommend_by_song(song_name, top_n=10):
     song_name = song_name.lower()
     df["name_lower"] = df["name"].str.lower()
