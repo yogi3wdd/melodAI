@@ -176,7 +176,7 @@ def recommend_by_artist(artist_name, top_n=100):
     ]
 
 
-def recommend_by_mood(mood, top_n=10):
+def recommend_by_mood(mood, top_n=10, max_distance=0.25):
     if mood not in mood_presets:
         return []
 
@@ -185,7 +185,11 @@ def recommend_by_mood(mood, top_n=10):
     )
     song_vecs = df[["valence", "energy", "danceability"]].fillna(0.5).values
     df["distance"] = euclidean_distances(song_vecs, mood_vec.reshape(1, -1))
-    recs = df.sort_values("distance").head(top_n)
+
+    # Filter lagu yang benar-benar dekat
+    close_songs = df[df["distance"] <= max_distance]
+
+    recs = close_songs.sort_values("distance").head(top_n)
 
     return [
         {
